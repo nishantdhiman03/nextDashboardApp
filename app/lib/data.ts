@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import {
   CustomerField,
-  CustomersTableType,
+  CustomersTableType, FormattedCustomersTable,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
@@ -216,3 +216,45 @@ export async function fetchFilteredCustomers(query: string) {
     throw new Error('Failed to fetch customer table.');
   }
 }
+
+/**
+ * Fetches all customer data aggregated with invoice totals,
+ * formatted for display in the CustomersTable component.
+ */
+export async function fetchCustomersForTable(): Promise<FormattedCustomersTable[]> {
+  try {
+    // Fetch customer data joined with aggregated invoice data
+    // This query is similar to fetchFilteredCustomers but without the WHERE clause
+    const data = await sql<CustomersTableType>`
+			SELECT
+			  customers.id,
+			  customers.name,
+			  customers.email,
+			  customers.image_url,
+			  COUNT(invoices.id) AS total_invoices,
+			  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+			  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+			FROM customers
+			-- Use LEFT JOIN to include customers even if they have no invoices
+			LEFT JOIN invoices ON customers.id = invoices.customer_id
+			-- No WHERE clause here, so we fetch all customers
+			GROUP BY customers.id, customers.name, customers.email, customers.image_url
+			ORDER BY customers.name ASC
+		  `;
+
+    // Format the pending and paid amounts using the utility function
+    const customers = data.rows.map((customer) => ({
+      ...customer,
+      total_pending: formatCurrency(customer.total_pending),
+      total_paid: formatCurrency(customer.total_paid),
+    }));
+
+    return customers;
+
+  } catch (err) {
+    console.error('Database Error:', err);
+    // Provide a specific error message
+    throw new Error('Failed to fetch customers for table.');
+  }
+}
+

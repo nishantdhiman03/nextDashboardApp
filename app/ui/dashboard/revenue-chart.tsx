@@ -1,7 +1,7 @@
 import { generateYAxis } from '@/app/lib/utils';
 import { CalendarIcon } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
-import { Revenue } from '@/app/lib/definitions';
+// import { Revenue } from '@/app/lib/definitions';
 import { fetchRevenue } from '@/app/lib/data';
 
 
@@ -59,7 +59,7 @@ import { fetchRevenue } from '@/app/lib/data';
           <CalendarIcon className="h-5 w-5 text-gray-500" />
           <h3 className="ml-2 text-sm text-gray-500 ">Last 12 months</h3>
         </div>
-      </div> 
+      </div>
     </div>
   );
 }

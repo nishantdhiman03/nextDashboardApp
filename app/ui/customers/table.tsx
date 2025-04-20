@@ -1,10 +1,32 @@
-import Image from 'next/image';
+// import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
 import {
-  CustomersTableType,
+  // CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
+import { deleteCustomer } from '@/app/lib/actions';
+import {TrashIcon} from "@heroicons/react/24/outline";
+
+// This makes the table code cleaner
+function DeleteCustomerButton({ id }: { id: string }) {
+  return (
+      // Each button is its own form submitting the ID
+      <form action={deleteCustomer}>
+        <input type="hidden" name="id" value={id} />
+        <button
+            type="submit"
+            className="rounded-md border p-2 hover:bg-gray-100"
+            aria-label="Delete customer"
+            // IMPORTANT: Add confirmation in a real app!
+            // onClick={(e) => { if (!confirm('Are you sure you want to delete this customer?')) e.preventDefault(); }}
+        >
+          <span className="sr-only">Delete</span> {/* Screen reader text */}
+          <TrashIcon className="w-5 text-red-500 hover:text-red-700" />
+        </button>
+      </form>
+  );
+}
 
 export default async function CustomersTable({
   customers,
@@ -31,7 +53,7 @@ export default async function CustomersTable({
                       <div>
                         <div className="mb-2 flex items-center">
                           <div className="flex items-center gap-3">
-                            <Image
+                            <img
                               src={customer.image_url}
                               className="rounded-full"
                               alt={`${customer.name}'s profile picture`}
@@ -80,6 +102,9 @@ export default async function CustomersTable({
                     <th scope="col" className="px-4 py-5 font-medium">
                       Total Paid
                     </th>
+                    <th scope="col" className="px-4 py-5 font-medium">
+                      Action
+                    </th>
                   </tr>
                 </thead>
 
@@ -88,7 +113,7 @@ export default async function CustomersTable({
                     <tr key={customer.id} className="group">
                       <td className="whitespace-nowrap bg-white py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-md group-last-of-type:rounded-md sm:pl-6">
                         <div className="flex items-center gap-3">
-                          <Image
+                          <img
                             src={customer.image_url}
                             className="rounded-full"
                             alt={`${customer.name}'s profile picture`}
@@ -109,6 +134,12 @@ export default async function CustomersTable({
                       </td>
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                         {customer.total_paid}
+                      </td>
+                      <td className="whitespace-nowrap bg-white py-3 pl-6 pr-3 group-first-of-type:rounded-r-md group-last-of-type:rounded-r-md">
+                        <div className="flex justify-end gap-3">
+                          <DeleteCustomerButton id={customer.id} />
+                          {/* Add Edit button form here if needed */}
+                        </div>
                       </td>
                     </tr>
                   ))}

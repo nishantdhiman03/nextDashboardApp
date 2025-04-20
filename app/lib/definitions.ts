@@ -86,3 +86,29 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+// app/lib/definitions.ts (add these parts)
+import { z } from 'zod';
+
+// Schema for validating customer form data using Zod
+export const CustomerSchema = z.object({
+  id: z.string(), // Although we won't set it in the form, it's part of the customer model
+  name: z.string().min(1, { message: 'Please enter a customer name.' }),
+  email: z.string().email({ message: 'Please enter a valid email address.' }),
+  image_url: z.string().url({ message: 'Please enter a valid image URL.' }),
+  // date is not needed here as it's not part of the customer table typically
+});
+
+// We only need a subset for the creation form
+export const CreateCustomerSchema = CustomerSchema.omit({ id: true });
+
+// Type for Server Action state (used with useFormState)
+export type CustomerFormState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    image_url?: string[];
+  };
+  message?: string | null;
+};
+
